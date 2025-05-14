@@ -8,6 +8,7 @@ use function Gendiff\CompareArrays\compareArrays;
 
 function getJSONData(string $filePath): array
 {
+    checkFile($filePath);
     $file = file_get_contents($filePath);
     return json_decode($file, true);
 }
@@ -16,13 +17,13 @@ function formatResult(array $diff): string
 {
     $lines = array_map(function ($item) {
         $mark = match ($item['mark']) {
-            -1 => '-',
-            1 => '+',
+            -1      => '-',
+            1       => '+',
             default => ' ',
         };
         $value = match ($item['value']) {
-            true => 'true',
-            false => 'false',
+            true    => 'true',
+            false   => 'false',
             default => $item['value'],
         };
         return " {$mark} {$item['key']}: {$value}";
@@ -58,9 +59,19 @@ function launchGenDiff(): void
     DOCOPT;
 
     $params = ['version' => 'gendiff 0.0.1'];
+    try {
+        $command = Docopt::handle($doc, $params);
+        Docopt\dump($command);
+        $result = genDiff($command['<firstFile>'], $command['<secondFile>']) . PHP_EOL;
+        print_r($result);
+    } catch (\RuntimeException $exception) {
+        echo $exception->getMessage();
+    }
+}
 
-    $command = Docopt::handle($doc, $params);
-    Docopt\dump($command);
-    $result = genDiff($command['<firstFile>'], $command['<secondFile>']) . PHP_EOL;
-    print_r($result);
+function checkFile(string $file = '')
+{
+    if (!file_exists($file)) {
+        throw new \RuntimeException('Files not found');
+    }
 }
