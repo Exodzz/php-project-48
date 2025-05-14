@@ -1,13 +1,16 @@
 {
     "name": "hexlet/code",
     "require": {
-        "docopt/docopt": "^1.0"
+        "docopt/docopt": "^1.0",
+        "phpunit/phpunit": "^10.5",
+        "symfony/var-dumper": "^6.4"
     },
     "autoload": {
         "files": [
             "./src/Gendiff.php"
         ]
     },
+    "license": "MIT",
     "authors": [
         {
             "name": "Sergey Gorshkov",
