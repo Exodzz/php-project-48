@@ -5,3 +5,5 @@ lint-fix:
 install:
 	composer install
 	@chmod -R 755 bin/*
+test:
+	composer exec --verbose phpunit tests
