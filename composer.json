@@ -18,5 +18,13 @@
             "name": "Sergey Gorshkov",
             "email": "gorshkov.s@extyl-pro.ru"
         }
-    ]
+    ],
+    "scripts": {
+        "test-coverage": [
+            "XDEBUG_MODE=coverage phpunit Tests --coverage-clover coverage.xml"
+        ],
+        "test-coverage-html": [
+            "XDEBUG_MODE=coverage phpunit Tests --coverage-html cov.html"
+        ]
+    }
 }
