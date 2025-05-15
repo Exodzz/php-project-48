@@ -27,3 +27,4 @@ jobs:
           SONAR_SOURCES: src
           SONAR_TESTS: tests
           SONAR_COVERAGE_REPORTS: coverage.xml
+          SONAR_ORGANIZATION: your-organization-key
