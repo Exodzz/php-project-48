@@ -21,10 +21,10 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_PROJECT_KEY: Exodzz_php-project-48
-          SONAR_PROJECT_NAME: Exodzz_php-project-48
-          SONAR_PROJECT_VERSION: 1.0
-          SONAR_SOURCES: src
-          SONAR_TESTS: tests
-          SONAR_COVERAGE_REPORTS: coverage.xml
-          SONAR_ORGANIZATION: your-organization-key
+          sonar.projectKey: Exodzz_php-project-48
+          sonar.projectName: Exodzz_php-project-48
+          sonar.projectVersion: 1.0
+          sonar.sources: src
+          sonar.tests: tests
+          sonar.php.coverage.reportPaths: coverage.xml
+          sonar.organization: Exodzz
