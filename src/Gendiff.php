@@ -3,14 +3,26 @@
 namespace Gendiff\Gendiff;
 
 use Docopt;
-
 use function Gendiff\CompareArrays\compareArrays;
+use function Gendiff\Parsers\parse;
 
-function getJSONData(string $filePath): array
+function formatValue($value): string
 {
-    checkFile($filePath);
-    $file = file_get_contents($filePath);
-    return json_decode($file, true);
+    if (is_bool($value)) {
+        return $value ? 'true' : 'false';
+    }
+    if (is_null($value)) {
+        return 'null';
+    }
+    if (is_array($value)) {
+        $items = array_map(
+            fn($key, $val) => "    {$key}: " . formatValue($val),
+            array_keys($value),
+            array_values($value)
+        );
+        return "{\n" . implode("\n", $items) . "\n  }";
+    }
+    return (string) $value;
 }
 
 function formatResult(array $diff): string
@@ -21,12 +33,7 @@ function formatResult(array $diff): string
             1       => '+',
             default => ' ',
         };
-        $value = match ($item['value']) {
-            true    => 'true',
-            false   => 'false',
-            default => $item['value'],
-        };
-        return " {$mark} {$item['key']}: {$value}";
+        return " {$mark} {$item['key']}: " . formatValue($item['value']);
     }, $diff);
     $result = implode("\n", $lines);
     return "{\n{$result}\n}";
@@ -34,11 +41,10 @@ function formatResult(array $diff): string
 
 function genDiff(string $filePath1, string $filePath2): string
 {
-    $data1 = getJSONData($filePath1);
-    $data2 = getJSONData($filePath2);
+    $data1 = parse($filePath1);
+    $data2 = parse($filePath2);
 
     $resultArray = compareArrays($data1, $data2);
-
     return formatResult($resultArray);
 }
 
@@ -58,14 +64,16 @@ function launchGenDiff(): void
         --format <fmt>                Report format [default: stylish]
     DOCOPT;
 
-    $params = ['version' => 'gendiff 0.0.1'];
+    $args = \Docopt::handle($doc, ['version' => 'Gendiff 1.0']);
+    
+    $firstFile = $args['<firstFile>'];
+    $secondFile = $args['<secondFile>'];
+    
     try {
-        $command = Docopt::handle($doc, $params);
-        Docopt\dump($command);
-        $result = genDiff($command['<firstFile>'], $command['<secondFile>']) . PHP_EOL;
-        print_r($result);
-    } catch (\RuntimeException $exception) {
-        echo $exception->getMessage();
+        echo genDiff($firstFile, $secondFile);
+    } catch (\Exception $e) {
+        echo "Error: " . $e->getMessage() . "\n";
+        exit(1);
     }
 }
 

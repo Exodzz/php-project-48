@@ -2,24 +2,40 @@
 
 namespace Gendiff\CompareArrays;
 
-function putDiffMark(array $array, int $mark): array
+function isArray($value): bool
 {
-    return array_map(
-        fn ($key, $value) => ['key' => $key, 'value' => $value, 'mark' => $mark],
-        array_keys($array),
-        array_values($array)
-    );
+    return is_array($value) && !empty($value);
 }
 
-function compareArrays(array $array1, array $array2): array
+function compareArrays(array $arr1, array $arr2): array
 {
-    $common = putdiffMark(array_intersect_assoc($array1, $array2), 0);
-    $diff1 = putdiffMark(array_diff_assoc($array1, $array2), -1);
-    $diff2 = putdiffMark(array_diff_assoc($array2, $array1), 1);
-    $result = array_merge_recursive($common, $diff1, $diff2);
-    usort($result, function ($a, $b) {
-        return ($a['key'] <=> $b['key']) ?: ($a['mark'] <=> $b['mark']);
-    });
+    $result = [];
+    $keys = array_unique(array_merge(array_keys($arr1), array_keys($arr2)));
+    sort($keys);
+
+    foreach ($keys as $key) {
+        if (!array_key_exists($key, $arr1)) {
+            $result[] = ['key' => $key, 'value' => $arr2[$key], 'mark' => 1];
+        } elseif (!array_key_exists($key, $arr2)) {
+            $result[] = ['key' => $key, 'value' => $arr1[$key], 'mark' => -1];
+        } elseif ($arr1[$key] === $arr2[$key]) {
+            $result[] = ['key' => $key, 'value' => $arr1[$key], 'mark' => 0];
+        } else {
+            if (isArray($arr1[$key]) && isArray($arr2[$key])) {
+                $nestedDiff = compareArrays($arr1[$key], $arr2[$key]);
+                foreach ($nestedDiff as $item) {
+                    $result[] = [
+                        'key' => "{$key}.{$item['key']}",
+                        'value' => $item['value'],
+                        'mark' => $item['mark']
+                    ];
+                }
+            } else {
+                $result[] = ['key' => $key, 'value' => $arr1[$key], 'mark' => -1];
+                $result[] = ['key' => $key, 'value' => $arr2[$key], 'mark' => 1];
+            }
+        }
+    }
 
     return $result;
 }
