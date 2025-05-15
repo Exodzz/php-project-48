@@ -21,10 +21,10 @@
     ],
     "scripts": {
         "test-coverage": [
-            "phpunit Tests --coverage-clover coverage.xml"
+            "phpunit tests --coverage-clover coverage.xml"
         ],
         "test-coverage-html": [
-            "phpunit Tests --coverage-html cov.html"
+            "phpunit tests --coverage-html cov.html"
         ]
     }
 }
