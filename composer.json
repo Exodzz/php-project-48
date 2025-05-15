@@ -11,7 +11,10 @@
         "files": [
             "./src/Gendiff.php",
             "./src/CompareArrays.php",
-            "./src/Parsers.php"
+            "./src/Parsers.php",
+            "./src/Formatters/stylish/stylish.php",
+            "./src/Formatters/plain/plain.php",
+            "./src/Formatters/index.php"
         ]
     },
     "license": "MIT",
@@ -26,7 +29,7 @@
             "XDEBUG_MODE=coverage phpunit tests -c phpunit.xml --coverage-clover coverage.xml"
         ],
         "test-coverage-html": [
-            "XDEBUG_MODE=coverage phpunit tests -c phpunit.xml --coverage-html cov.html"
+            "phpunit tests -c phpunit.xml --coverage-html cov.html"
         ]
     }
 }

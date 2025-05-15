@@ -5,6 +5,7 @@ namespace Gendiff\Gendiff;
 use Docopt;
 use function Gendiff\CompareArrays\compareArrays;
 use function Gendiff\Parsers\parse;
+use function Gendiff\Formatters\format;
 
 function formatValue($value): string
 {
@@ -22,7 +23,7 @@ function formatValue($value): string
         );
         return "{\n" . implode("\n", $items) . "\n  }";
     }
-    return (string) $value;
+    return (string)$value;
 }
 
 function formatResult(array $diff): string
@@ -39,47 +40,58 @@ function formatResult(array $diff): string
     return "{\n{$result}\n}";
 }
 
-function genDiff(string $filePath1, string $filePath2): string
+function checkFile(string $filePath): bool
 {
+    if (!file_exists($filePath)) {
+        throw new \RuntimeException("File not found: {$filePath}");
+    }
+
+    $extension = pathinfo($filePath, PATHINFO_EXTENSION);
+    if (!in_array($extension, ['json', 'yaml', 'yml'])) {
+        throw new \RuntimeException("Unsupported file format: {$extension}");
+    }
+
+    return true;
+}
+
+function genDiff(string $filePath1, string $filePath2, string $format = 'stylish'): string
+{
+    checkFile($filePath1);
+    checkFile($filePath2);
+
     $data1 = parse($filePath1);
     $data2 = parse($filePath2);
 
     $resultArray = compareArrays($data1, $data2);
-    return formatResult($resultArray);
+    return format($resultArray, $format);
 }
 
 function launchGenDiff(): void
 {
     $doc = <<<'DOCOPT'
-    Generate diff
+Generate diff
 
-    Usage:
-        gendiff (-h|--help)
-        gendiff (-v|--version)
-        gendiff [--format <fmt>] <firstFile> <secondFile>
+Usage:
+  gendiff (-h|--help)
+  gendiff (-v|--version)
+  gendiff [--format <fmt>] <firstFile> <secondFile>
 
-    Options:
-        -h --help                     Show this screen
-        -v --version                  Show version
-        --format <fmt>                Report format [default: stylish]
-    DOCOPT;
+Options:
+  -h --help                     Show this screen
+  -v --version                  Show version
+  --format <fmt>                Output format [default: stylish]
+DOCOPT;
 
-    $args = \Docopt::handle($doc, ['version' => 'Gendiff 1.0']);
-    
-    $firstFile = $args['<firstFile>'];
-    $secondFile = $args['<secondFile>'];
-    
     try {
-        echo genDiff($firstFile, $secondFile);
-    } catch (\Exception $e) {
-        echo "Error: " . $e->getMessage() . "\n";
-        exit(1);
-    }
-}
+        $args = Docopt::handle($doc, ['version' => '1.0.0']);
+        $format = $args->args['--format'] ?? 'stylish';
+        $file1 = $args->args['<firstFile>'];
+        $file2 = $args->args['<secondFile>'];
 
-function checkFile(string $file = '')
-{
-    if (!file_exists($file)) {
-        throw new \RuntimeException('Files not found');
+        echo genDiff($file1, $file2, $format) . PHP_EOL;
+
+    } catch (\Exception|\RuntimeException $e) {
+        echo $e->getMessage() . PHP_EOL;
+        exit(1);
     }
 }

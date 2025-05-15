@@ -6,6 +6,10 @@ use PHPUnit\Framework\TestCase;
 use function Gendiff\CompareArrays\compareArrays;
 use function Gendiff\Gendiff\genDiff;
 use function Gendiff\Parsers\parse;
+use function Gendiff\Formatters\plain\formatValue;
+use function Gendiff\Formatters\plain\plain;
+use function Gendiff\Gendiff\launchGenDiff;
+use function Gendiff\Gendiff\checkFile;
 
 class GendiffTest extends TestCase
 {
@@ -35,9 +39,116 @@ class GendiffTest extends TestCase
 
     public function testGendiff(): void
     {
-        $diff = "{\n - follow: false\n   host: hexlet.io\n - proxy: 123.234.53.22\n - timeout: 50\n + timeout: 20\n + verbose: true\n}";
+        $diff = <<<DIFF
+{
+  + common.follow: false
+    common.setting1: Value 1
+  - common.setting2: 200
+  - common.setting3: true
+  + common.setting3: null
+  + common.setting4: blah blah
+  + common.setting5: {
+    key5: value5
+}
+  - common.setting6.doge.wow: 
+  + common.setting6.doge.wow: so much
+    common.setting6.key: value
+  + common.setting6.ops: vops
+  - group1.baz: bas
+  + group1.baz: bars
+    group1.foo: bar
+  - group1.nest: {
+    key: value
+}
+  + group1.nest: str
+  - group2: {
+    abc: 12345
+    deep: {
+        id: 45
+    }
+}
+  + group3: {
+    deep: {
+        id: {
+            number: 45
+        }
+    }
+    fee: 100500
+}
+}
+DIFF;
         $actual = genDiff(__DIR__."/fixtures/file1.json", __DIR__."/fixtures/file2.json");
         $this->assertEquals($diff, $actual);
+    }
+
+    public function testGendiffWithNestedStructures(): void
+    {
+        $expected = <<<DIFF
+{
+  - common: {
+    setting1: Value 1
+    setting2: 200
+    setting3: true
+    setting6: {
+        key: value
+        doge: {
+            wow: 
+        }
+    }
+}
+  + common: {
+    follow: false
+    setting1: Value 1
+    setting3: null
+    setting4: blah blah
+    setting5: {
+        key5: value5
+    }
+    setting6: {
+        key: value
+        ops: vops
+        doge: {
+            wow: so much
+        }
+    }
+}
+  - follow: false
+  - group1: {
+    baz: bas
+    foo: bar
+    nest: {
+        key: value
+    }
+}
+  + group1: {
+    foo: bar
+    baz: bars
+    nest: str
+}
+  - group2: {
+    abc: 12345
+    deep: {
+        id: 45
+    }
+}
+  + group3: {
+    deep: {
+        id: {
+            number: 45
+        }
+    }
+    fee: 100500
+}
+    host: hexlet.io
+  - proxy: 123.234.53.22
+  - timeout: 50
+  + timeout: 20
+  + verbose: true
+}
+DIFF;
+
+        $actual = genDiff(__DIR__."/fixtures/file1.yaml", __DIR__."/fixtures/file2.yaml");
+        $this->assertEquals($expected, $actual);
     }
 
     public function testParseYaml(): void
@@ -116,12 +227,135 @@ class GendiffTest extends TestCase
         file_put_contents($tempFile1 . '.yaml', $yaml1);
         file_put_contents($tempFile2 . '.yaml', $yaml2);
 
-        $expected = "{\n - follow: false\n   host: hexlet.io\n - proxy: 123.234.53.22\n - timeout: 50\n + timeout: 20\n + verbose: true\n}";
+        $expected = <<<DIFF
+{
+  - follow: false
+    host: hexlet.io
+  - proxy: 123.234.53.22
+  - timeout: 50
+  + timeout: 20
+  + verbose: true
+}
+DIFF;
         $actual = genDiff($tempFile1 . '.yaml', $tempFile2 . '.yaml');
         
         $this->assertEquals($expected, $actual);
 
         unlink($tempFile1 . '.yaml');
         unlink($tempFile2 . '.yaml');
+    }
+
+    public function testGendiffWithPlainFormat(): void
+    {
+        $expected = <<<DIFF
+Property 'common.follow' was added with value: false
+Property 'common.setting2' was removed
+Property 'common.setting3' was updated. From true to null
+Property 'common.setting4' was added with value: 'blah blah'
+Property 'common.setting5' was added with value: [complex value]
+Property 'common.setting6.doge.wow' was updated. From '' to 'so much'
+Property 'common.setting6.ops' was added with value: 'vops'
+Property 'group1.baz' was updated. From 'bas' to 'bars'
+Property 'group1.nest' was updated. From [complex value] to 'str'
+Property 'group2' was removed
+Property 'group3' was added with value: [complex value]
+DIFF;
+
+        $actual = genDiff(__DIR__."/fixtures/file1.json", __DIR__."/fixtures/file2.json", 'plain');
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function testGendiffWithInvalidFormat(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Unsupported format: invalid');
+        
+        genDiff(__DIR__."/fixtures/file1.json", __DIR__."/fixtures/file2.json", 'invalid');
+    }
+
+    public function testFormatValue(): void
+    {
+        $this->assertEquals('true', formatValue(true));
+        $this->assertEquals('false', formatValue(false));
+        $this->assertEquals('null', formatValue(null));
+        $this->assertEquals("'string'", formatValue('string'));
+        $this->assertEquals('123', formatValue(123));
+        $this->assertEquals('[complex value]', formatValue(['key' => 'value']));
+        $this->assertEquals('[complex value]', formatValue((object)['key' => 'value']));
+    }
+
+    public function testFormatResult(): void
+    {
+        $diff = [
+            ['key' => 'key1', 'value' => 'value1', 'mark' => 1],
+            ['key' => 'key2', 'value' => 'value2', 'mark' => -1],
+            ['key' => 'key3', 'value' => 'value3', 'mark' => 0]
+        ];
+
+        $expected = "Property 'key1' was added with value: 'value1'\nProperty 'key2' was removed";
+        $this->assertEquals($expected, plain($diff));
+    }
+
+    public function testCheckFile(): void
+    {
+        // Тест на несуществующий файл
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('File not found: nonexistent.txt');
+        checkFile('nonexistent.txt');
+
+        // Тест на неподдерживаемый формат
+        $tempFile = tempnam(sys_get_temp_dir(), 'test_');
+        rename($tempFile, $tempFile . '.txt');
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Unsupported file format: txt');
+        checkFile($tempFile . '.txt');
+        unlink($tempFile . '.txt');
+    }
+
+    public function testLaunchGenDiff(): void
+    {
+        // Сохраняем оригинальные аргументы
+        $originalArgv = $GLOBALS['argv'];
+
+        // Тест на помощь
+        $GLOBALS['argv'] = ['gendiff', '--help'];
+        $this->expectsOutputRegex('/Usage:/');
+        launchGenDiff();
+
+        // Тест на версию
+        $GLOBALS['argv'] = ['gendiff', '--version'];
+        $this->expectsOutput('1.0.0');
+        launchGenDiff();
+
+        // Тест на несуществующий файл
+        $GLOBALS['argv'] = ['gendiff', 'nonexistent1.json', 'nonexistent2.json'];
+        $this->expectsOutput('File not found: nonexistent1.json');
+        launchGenDiff();
+
+        // Тест на неподдерживаемый формат
+        $GLOBALS['argv'] = ['gendiff', '--format', 'invalid', __DIR__."/fixtures/file1.json", __DIR__."/fixtures/file2.json"];
+        $this->expectsOutput('Unsupported format: invalid');
+        launchGenDiff();
+
+        // Тест на успешное выполнение с plain форматом
+        $GLOBALS['argv'] = ['gendiff', '--format', 'plain', __DIR__."/fixtures/file1.json", __DIR__."/fixtures/file2.json"];
+        $expected = <<<DIFF
+Property 'common.follow' was added with value: false
+Property 'common.setting2' was removed
+Property 'common.setting3' was updated. From true to null
+Property 'common.setting4' was added with value: 'blah blah'
+Property 'common.setting5' was added with value: [complex value]
+Property 'common.setting6.doge.wow' was updated. From '' to 'so much'
+Property 'common.setting6.ops' was added with value: 'vops'
+Property 'group1.baz' was updated. From 'bas' to 'bars'
+Property 'group1.nest' was updated. From [complex value] to 'str'
+Property 'group2' was removed
+Property 'group3' was added with value: [complex value]
+DIFF;
+        $this->expectsOutput($expected);
+        launchGenDiff();
+
+        // Восстанавливаем оригинальные аргументы
+        $GLOBALS['argv'] = $originalArgv;
     }
 }
