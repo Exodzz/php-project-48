@@ -12,7 +12,7 @@ use function Differ\Parsers\getData;
 /**
  * @throws Exception
  */
-function genDiff(string $filePath1, string $filePath2, string $format = DEFAULT_FORMAT): string
+function genDiff(string $filePath1, string $filePath2, string $format = DEFAULT_FORMAT): bool|string
 {
     $data1 = getData($filePath1);
     $data2 = getData($filePath2);
