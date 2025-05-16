@@ -1,5 +1,5 @@
 {
-    "name": "hexlet/code",
+    "name": "hexlet/differ",
     "require": {
         "docopt/docopt": "^1.0",
         "squizlabs/php_codesniffer": "^3.10",
@@ -10,6 +10,9 @@
         "phpstan/phpstan": "^1.12"
     },
     "autoload": {
+        "psr-4": {
+            "Differ\\": "src/"
+        },
         "files": [
             "./src/Gendiff.php",
             "./src/CompareArrays.php",

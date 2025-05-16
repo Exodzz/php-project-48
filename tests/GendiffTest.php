@@ -1,14 +1,14 @@
 <?php
 
-namespace Gendiff\Tests;
+namespace Differ\Tests;
 
 use PHPUnit\Framework\TestCase;
 use function Gendiff\CompareArrays\compareArrays;
-use function Gendiff\Gendiff\genDiff;
+use function Differ\Differ\genDiff;
 use function Gendiff\Parsers\parse;
 use function Gendiff\Formatters\plain\formatValue;
 use function Gendiff\Formatters\plain\format as formatPlain;
-use function Gendiff\Gendiff\checkFile;
+use function Differ\Differ\checkFile;
 
 class GendiffTest extends TestCase
 {
