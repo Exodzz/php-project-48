@@ -34,9 +34,16 @@ function format(array $diff, int $depth = 0): string
             1       => '+',
             default => ' ',
         };
-        $value = formatValue($item['value'], $depth);
+        
+        if (isset($item['children'])) {
+            $value = format($item['children'], $depth + 1);
+        } else {
+            $value = formatValue($item['value'], $depth);
+        }
+        
         return "{$indent}  {$mark} {$item['key']}: {$value}";
     }, $diff);
+    
     $result = implode("\n", $lines);
     return "{\n{$result}\n{$indent}}";
 }

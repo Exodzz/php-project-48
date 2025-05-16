@@ -22,14 +22,11 @@ function compareArrays(array $arr1, array $arr2): array
             $result[] = ['key' => $key, 'value' => $arr1[$key], 'mark' => 0];
         } else {
             if (isArray($arr1[$key]) && isArray($arr2[$key])) {
-                $nestedDiff = compareArrays($arr1[$key], $arr2[$key]);
-                foreach ($nestedDiff as $item) {
-                    $result[] = [
-                        'key' => "{$key}.{$item['key']}",
-                        'value' => $item['value'],
-                        'mark' => $item['mark']
-                    ];
-                }
+                $result[] = [
+                    'key' => $key,
+                    'children' => compareArrays($arr1[$key], $arr2[$key]),
+                    'mark' => 0
+                ];
             } else {
                 $result[] = ['key' => $key, 'value' => $arr1[$key], 'mark' => -1];
                 $result[] = ['key' => $key, 'value' => $arr2[$key], 'mark' => 1];
