@@ -25,7 +25,7 @@ function formatValue($value, int $depth = 0): string
     return (string) $value;
 }
 
-function stylish(array $diff, int $depth = 0): string
+function format(array $diff, int $depth = 0): string
 {
     $indent = str_repeat('    ', $depth);
     $lines = array_map(function ($item) use ($indent, $depth) {

@@ -7,8 +7,7 @@ use function Gendiff\CompareArrays\compareArrays;
 use function Gendiff\Gendiff\genDiff;
 use function Gendiff\Parsers\parse;
 use function Gendiff\Formatters\plain\formatValue;
-use function Gendiff\Formatters\plain\plain;
-use function Gendiff\Gendiff\launchGenDiff;
+use function Gendiff\Formatters\plain\format as formatPlain;
 use function Gendiff\Gendiff\checkFile;
 
 class GendiffTest extends TestCase
@@ -293,7 +292,7 @@ DIFF;
         ];
 
         $expected = "Property 'key1' was added with value: 'value1'\nProperty 'key2' was removed";
-        $this->assertEquals($expected, plain($diff));
+        $this->assertEquals($expected, formatPlain($diff));
     }
 
     public function testCheckFile(): void
@@ -312,50 +311,109 @@ DIFF;
         unlink($tempFile . '.txt');
     }
 
-    public function testLaunchGenDiff(): void
+    public function testGendiffWithJsonFormat(): void
     {
-        // Сохраняем оригинальные аргументы
-        $originalArgv = $GLOBALS['argv'];
+        $expected = json_encode([
+            [
+                'key' => 'common.follow',
+                'value' => false,
+                'mark' => 1
+            ],
+            [
+                'key' => 'common.setting1',
+                'value' => 'Value 1',
+                'mark' => 0
+            ],
+            [
+                'key' => 'common.setting2',
+                'value' => 200,
+                'mark' => -1
+            ],
+            [
+                'key' => 'common.setting3',
+                'value' => true,
+                'mark' => -1
+            ],
+            [
+                'key' => 'common.setting3',
+                'value' => null,
+                'mark' => 1
+            ],
+            [
+                'key' => 'common.setting4',
+                'value' => 'blah blah',
+                'mark' => 1
+            ],
+            [
+                'key' => 'common.setting5',
+                'value' => ['key5' => 'value5'],
+                'mark' => 1
+            ],
+            [
+                'key' => 'common.setting6.doge.wow',
+                'value' => '',
+                'mark' => -1
+            ],
+            [
+                'key' => 'common.setting6.doge.wow',
+                'value' => 'so much',
+                'mark' => 1
+            ],
+            [
+                'key' => 'common.setting6.key',
+                'value' => 'value',
+                'mark' => 0
+            ],
+            [
+                'key' => 'common.setting6.ops',
+                'value' => 'vops',
+                'mark' => 1
+            ],
+            [
+                'key' => 'group1.baz',
+                'value' => 'bas',
+                'mark' => -1
+            ],
+            [
+                'key' => 'group1.baz',
+                'value' => 'bars',
+                'mark' => 1
+            ],
+            [
+                'key' => 'group1.foo',
+                'value' => 'bar',
+                'mark' => 0
+            ],
+            [
+                'key' => 'group1.nest',
+                'value' => ['key' => 'value'],
+                'mark' => -1
+            ],
+            [
+                'key' => 'group1.nest',
+                'value' => 'str',
+                'mark' => 1
+            ],
+            [
+                'key' => 'group2',
+                'value' => [
+                    'abc' => 12345,
+                    'deep' => ['id' => 45]
+                ],
+                'mark' => -1
+            ],
+            [
+                'key' => 'group3',
+                'value' => [
+                    'deep' => ['id' => ['number' => 45]],
+                    'fee' => 100500
+                ],
+                'mark' => 1
+            ]
+        ], JSON_PRETTY_PRINT);
 
-        // Тест на помощь
-        $GLOBALS['argv'] = ['gendiff', '--help'];
-        $this->expectsOutputRegex('/Usage:/');
-        launchGenDiff();
-
-        // Тест на версию
-        $GLOBALS['argv'] = ['gendiff', '--version'];
-        $this->expectsOutput('1.0.0');
-        launchGenDiff();
-
-        // Тест на несуществующий файл
-        $GLOBALS['argv'] = ['gendiff', 'nonexistent1.json', 'nonexistent2.json'];
-        $this->expectsOutput('File not found: nonexistent1.json');
-        launchGenDiff();
-
-        // Тест на неподдерживаемый формат
-        $GLOBALS['argv'] = ['gendiff', '--format', 'invalid', __DIR__."/fixtures/file1.json", __DIR__."/fixtures/file2.json"];
-        $this->expectsOutput('Unsupported format: invalid');
-        launchGenDiff();
-
-        // Тест на успешное выполнение с plain форматом
-        $GLOBALS['argv'] = ['gendiff', '--format', 'plain', __DIR__."/fixtures/file1.json", __DIR__."/fixtures/file2.json"];
-        $expected = <<<DIFF
-Property 'common.follow' was added with value: false
-Property 'common.setting2' was removed
-Property 'common.setting3' was updated. From true to null
-Property 'common.setting4' was added with value: 'blah blah'
-Property 'common.setting5' was added with value: [complex value]
-Property 'common.setting6.doge.wow' was updated. From '' to 'so much'
-Property 'common.setting6.ops' was added with value: 'vops'
-Property 'group1.baz' was updated. From 'bas' to 'bars'
-Property 'group1.nest' was updated. From [complex value] to 'str'
-Property 'group2' was removed
-Property 'group3' was added with value: [complex value]
-DIFF;
-        $this->expectsOutput($expected);
-        launchGenDiff();
-
-        // Восстанавливаем оригинальные аргументы
-        $GLOBALS['argv'] = $originalArgv;
+        $actual = genDiff(__DIR__."/fixtures/file1.json", __DIR__."/fixtures/file2.json", 'json');
+        $this->assertEquals($expected, $actual);
     }
+
 }

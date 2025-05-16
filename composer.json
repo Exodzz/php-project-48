@@ -12,8 +12,9 @@
             "./src/Gendiff.php",
             "./src/CompareArrays.php",
             "./src/Parsers.php",
-            "./src/Formatters/stylish/stylish.php",
-            "./src/Formatters/plain/plain.php",
+            "./src/Formatters/stylish/format.php",
+            "./src/Formatters/plain/format.php",
+            "./src/Formatters/json/format.php",
             "./src/Formatters/index.php"
         ]
     },

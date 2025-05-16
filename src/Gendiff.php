@@ -6,7 +6,9 @@ use Docopt;
 
 use function Gendiff\CompareArrays\compareArrays;
 use function Gendiff\Parsers\parse;
-use function Gendiff\Formatters\format;
+use function Gendiff\Formatters\stylish\format as formatStylish;
+use function Gendiff\Formatters\plain\format as formatPlain;
+use function Gendiff\Formatters\json\format as formatJson;
 
 function formatValue($value): string
 {
@@ -64,7 +66,13 @@ function genDiff(string $filePath1, string $filePath2, string $format = 'stylish
     $data2 = parse($filePath2);
 
     $resultArray = compareArrays($data1, $data2);
-    return format($resultArray, $format);
+
+    return match ($format) {
+        'stylish' => formatStylish($resultArray),
+        'plain' => formatPlain($resultArray),
+        'json' => formatJson($resultArray),
+        default => throw new \RuntimeException("Unsupported format: {$format}")
+    };
 }
 
 function launchGenDiff(): void
@@ -89,9 +97,8 @@ DOCOPT;
         $file1 = $args->args['<firstFile>'];
         $file2 = $args->args['<secondFile>'];
 
-        echo genDiff($file1, $file2, $format) . PHP_EOL;
+        echo genDiff($file1, $file2, $format);
     } catch (\Exception | \RuntimeException $e) {
-        echo $e->getMessage() . PHP_EOL;
-        exit(1);
+        echo $e->getMessage() ;
     }
 }

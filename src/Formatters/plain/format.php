@@ -73,7 +73,7 @@ function formatDiff(array $diff, array $path = []): array
     return $lines;
 }
 
-function plain(array $diff): string
+function format(array $diff): string
 {
     $lines = formatDiff($diff);
     return implode("\n", $lines);
