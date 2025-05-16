@@ -42,6 +42,10 @@ function format(array $diff, int $depth = 0): string
         }
         
         $currentIndent = str_repeat('    ', $depth);
+        if ($mark === ' ') {
+            return "{$currentIndent}  {$mark} {$item['key']}: {$value}";
+        }
+        
         return "{$currentIndent}  {$mark} {$item['key']}: {$value}";
     }, $diff);
     
