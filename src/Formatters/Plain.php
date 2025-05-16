@@ -28,7 +28,7 @@ function makeLine(string $property, int $mark, string $value = null, string $new
     }
 }
 
-function formatResult(array $diff, array $acc = [], string $path = ''): string|bool
+function formatResult(array $diff, array $acc = [], string $path = ''): string
 {
     $result = array_reduce($diff, function (array $acc, array $item) use ($path) {
         $pathCurrent = $path === '' ? $item['key'] : "{$path}.{$item['key']}";
@@ -49,5 +49,5 @@ function formatResult(array $diff, array $acc = [], string $path = ''): string|b
         return [...$acc, $line];
     }, $acc);
 
-    return implode(PHP_EOL, $result);
+    return implode(PHP_EOL, $result)?:'';
 }
