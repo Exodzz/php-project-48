@@ -41,7 +41,8 @@ function format(array $diff, int $depth = 0): string
             $value = formatValue($item['value'], $depth + 1);
         }
         
-        return "{$indent}  {$mark} {$item['key']}: {$value}";
+        $currentIndent = str_repeat('    ', $depth);
+        return "{$currentIndent}  {$mark} {$item['key']}: {$value}";
     }, $diff);
     
     $result = implode("\n", $lines);
