@@ -1,41 +1,46 @@
 <?php
 
-namespace Gendiff\CompareArrays;
+namespace Differ\CompareArrays;
 
-function isArray($value): bool
+function putDiffMark(mixed $key, mixed $value, int $mark, bool $isUpdatedValue = null, mixed $newValue = null): array
 {
-    return is_array($value) && !empty($value);
+    return ['key' => $key, 'value' => $value, 'mark' => $mark,
+        'newValue' => $newValue, 'isUpdatedValue' => $isUpdatedValue];
 }
 
-function compareArrays(array $arr1, array $arr2): array
+function compareTrees(array $array1, array $array2): array
 {
-    $result = [];
-    $keys = array_unique(array_merge(array_keys($arr1), array_keys($arr2)));
-    sort($keys);
+    $keys = array_unique(array_merge(array_keys($array1), array_keys($array2)));
+    $keysSorted = \Functional\sort($keys, fn ($first, $second) => $first <=> $second);
 
-    foreach ($keys as $key) {
-        if (!array_key_exists($key, $arr1)) {
-            $result[] = ['key' => $key, 'value' => $arr2[$key], 'mark' => 1];
-        } elseif (!array_key_exists($key, $arr2)) {
-            $result[] = ['key' => $key, 'value' => $arr1[$key], 'mark' => -1];
-        } elseif ($arr1[$key] === $arr2[$key]) {
-            $result[] = ['key' => $key, 'value' => $arr1[$key], 'mark' => 0];
-        } else {
-            if (isArray($arr1[$key]) && isArray($arr2[$key])) {
-                $children = compareArrays($arr1[$key], $arr2[$key]);
-                if (!empty($children)) {
-                    $result[] = [
-                        'key' => $key,
-                        'children' => $children,
-                        'mark' => 0
-                    ];
-                }
-            } else {
-                $result[] = ['key' => $key, 'value' => $arr1[$key], 'mark' => -1];
-                $result[] = ['key' => $key, 'value' => $arr2[$key], 'mark' => 1];
-            }
+    return array_reduce($keysSorted, function ($carry, $key) use ($array1, $array2) {
+        $keyExist1 = key_exists($key, $array1);
+        $keyExist2 = key_exists($key, $array2);
+        //key1 exist, key2 not
+        if ($keyExist1 && !$keyExist2) {
+            return [...$carry, putDiffMark($key, $array1[$key], -1)];
         }
-    }
-
-    return $result;
+        //key2 exit, key1 not
+        if (!$keyExist1 && $keyExist2) {
+            return [...$carry, putDiffMark($key, $array2[$key], 1)];
+        }
+        //both exist
+        $value1 = $array1[$key];
+        $value2 = $array2[$key];
+        //if assoc in both - go deeper
+        if (is_array($value1) && !array_is_list($value1) && is_array($value2) && !array_is_list($value2)) {
+            return [...$carry, putDiffMark($key, compareTrees($value1, $value2), 0)];
+        }
+        //if list - compare values, but maybe need to put mark to children
+        //if scalar - compare values
+        if ($value1 === $value2) {
+            return [...$carry, putDiffMark($key, $value1, 0)];
+        }
+        //not equal
+        //first with -1
+        //second with 1
+        $deleted = putDiffMark($key, $value1, -1, true, $value2);
+        $added = putDiffMark($key, $value2, 1, false);
+        return [...$carry, $deleted, $added];
+    }, []);
 }

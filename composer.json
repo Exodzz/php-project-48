@@ -1,27 +1,12 @@
 {
     "name": "hexlet/code",
-    "require": {
-        "docopt/docopt": "^1.0",
-        "squizlabs/php_codesniffer": "^3.10",
-        "phpunit/phpunit": "^11.0",
-        "symfony/yaml": "^6.0"
-    },
+    "description": "diff two files",
+    "type": "library",
     "require-dev": {
-        "phpstan/phpstan": "^1.12"
-    },
-    "autoload": {
-        "psr-4": {
-            "Differ\\": "src/"
-        },
-        "files": [
-            "./src/Gendiff.php",
-            "./src/CompareArrays.php",
-            "./src/Parsers.php",
-            "./src/Formatters/stylish/format.php",
-            "./src/Formatters/plain/format.php",
-            "./src/Formatters/json/format.php",
-            "./src/Formatters/index.php"
-        ]
+        "squizlabs/php_codesniffer": "^3.10",
+        "phpstan/phpstan": "^1.12",
+        "phpunit/phpunit": "^10.5",
+        "symfony/var-dumper": "^6.4"
     },
     "license": "MIT",
     "authors": [
@@ -30,6 +15,30 @@
             "email": "gorshkov.s@extyl-pro.ru"
         }
     ],
+    "bin": [
+        "bin/gendiff"
+    ],
+    "autoload": {
+        "files": [
+            "src/Differ.php",
+            "src/CompareArrays.php",
+            "src/Parsers.php",
+            "src/Formatter.php",
+            "src/Formatters/Stylish.php",
+            "src/Formatters/Plain.php",
+            "src/Formatters/Json.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Differ\\Tests\\": "tests"
+        }
+    },
+    "require": {
+        "docopt/docopt": "^1.0",
+        "symfony/yaml": "^6.4",
+        "lstrojny/functional-php": "^1.17"
+    },
     "scripts": {
         "test-coverage": [
             "XDEBUG_MODE=coverage phpunit tests -c phpunit.xml --coverage-clover coverage.xml"

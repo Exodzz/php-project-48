@@ -1,9 +1,9 @@
 #!/usr/bin/env php
 <?php
 
+use function Differ\Differ\genDiff;
 
 $autoloadPath1 = __DIR__ . '/../../../autoload.php';
-
 $autoloadPath2 = __DIR__ . '/../vendor/autoload.php';
 
 if (file_exists($autoloadPath1)) {
@@ -11,7 +11,32 @@ if (file_exists($autoloadPath1)) {
 } else {
     require_once $autoloadPath2;
 }
-use function Differ\Differ\launchGenDiff;
 
-launchGenDiff();
-?>
+
+$doc = <<<'DOCOPT'
+Generate diff
+
+Usage:
+    gendiff (-h|--help)
+    gendiff (-v|--version)
+    gendiff [--format <fmt>] <firstFile> <secondFile>
+
+Options:
+    -h --help                     Show this screen
+    -v --version                  Show version
+    --format <fmt>                Report format [default: stylish]
+DOCOPT;
+
+$params = ['version' => 'gendiff 0.0.1'];
+
+$command = Docopt::handle($doc, $params);
+//todo if need check the answer
+$format = $command['--format'];
+try {
+    $result = genDiff($command['<firstFile>'], $command['<secondFile>'], $format) . PHP_EOL;
+} catch (Exception $e) {
+    echo $e->getMessage();
+    return null;
+}
+
+print_r($result);
