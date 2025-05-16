@@ -49,5 +49,5 @@ function formatResult(array $diff, array $acc = [], string $path = ''): string
         return [...$acc, $line];
     }, $acc);
 
-    return implode(PHP_EOL, $result)?:'';
+    return implode(PHP_EOL, $result);
 }

@@ -19,5 +19,5 @@ function genDiff(string $filePath1, string $filePath2, string $format = DEFAULT_
 
     $resultArray = compareTrees($data1, $data2);
 
-    return formatResult($resultArray, $format)?:'';
+    return formatResult($resultArray, $format);
 }

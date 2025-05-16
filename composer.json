@@ -45,6 +45,9 @@
         ],
         "test-coverage-html": [
             "phpunit tests -c phpunit.xml --coverage-html cov.html"
+        ],
+        "stan": [
+            "phpstan analyse bin src tests --level=8"
         ]
     }
 }
