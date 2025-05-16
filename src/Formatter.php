@@ -10,7 +10,7 @@ use Exception;
 /**
  * @throws Exception
  */
-function formatResult(array $diff, string $format): string
+function formatResult(array $diff, string $format): string|bool
 {
     return match ($format) {
         'stylish' => Stylish\formatResult($diff),
