@@ -38,7 +38,7 @@ function format(array $diff, int $depth = 0): string
         if (isset($item['children'])) {
             $value = format($item['children'], $depth + 1);
         } else {
-            $value = formatValue($item['value'], $depth);
+            $value = formatValue($item['value'], $depth + 1);
         }
         
         return "{$indent}  {$mark} {$item['key']}: {$value}";
