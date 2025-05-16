@@ -41,6 +41,10 @@ function format(array $diff, int $depth = 0): string
             $value = formatValue($item['value'], $depth + 1);
         }
         
+        if ($mark === ' ') {
+            return "{$indent}  {$mark} {$item['key']}: {$value}";
+        }
+        
         return "{$indent}  {$mark} {$item['key']}: {$value}";
     }, $diff);
     
