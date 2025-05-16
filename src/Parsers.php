@@ -9,7 +9,7 @@ function convertToArray($data): array
     if (is_object($data)) {
         $data = (array) $data;
     }
-    
+
     if (is_array($data)) {
         $result = [];
         foreach ($data as $key => $value) {
@@ -25,7 +25,7 @@ function convertToArray($data): array
         }
         return $result;
     }
-    
+
     return $data;
 }
 
@@ -41,10 +41,10 @@ function parse(string $filePath): array
     }
 
     $extension = pathinfo($filePath, PATHINFO_EXTENSION);
-    
+
     return match ($extension) {
         'json' => json_decode($content, true),
         'yaml', 'yml' => convertToArray(Yaml::parse($content, Yaml::PARSE_OBJECT_FOR_MAP)),
         default => throw new \RuntimeException("Unsupported file format: {$extension}")
     };
-} 
+}

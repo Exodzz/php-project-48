@@ -3,6 +3,7 @@
 namespace Gendiff\Gendiff;
 
 use Docopt;
+
 use function Gendiff\CompareArrays\compareArrays;
 use function Gendiff\Parsers\parse;
 use function Gendiff\Formatters\format;
@@ -89,8 +90,7 @@ DOCOPT;
         $file2 = $args->args['<secondFile>'];
 
         echo genDiff($file1, $file2, $format) . PHP_EOL;
-
-    } catch (\Exception|\RuntimeException $e) {
+    } catch (\Exception | \RuntimeException $e) {
         echo $e->getMessage() . PHP_EOL;
         exit(1);
     }

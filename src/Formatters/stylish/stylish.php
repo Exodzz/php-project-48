@@ -39,4 +39,4 @@ function stylish(array $diff, int $depth = 0): string
     }, $diff);
     $result = implode("\n", $lines);
     return "{\n{$result}\n{$indent}}";
-} 
+}

@@ -12,4 +12,4 @@ function format(array $diff, string $format = 'stylish'): string
         'plain' => plain($diff),
         default => throw new \RuntimeException("Unsupported format: {$format}")
     };
-} 
+}
