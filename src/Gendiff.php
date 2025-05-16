@@ -89,9 +89,8 @@ DOCOPT;
         $file1 = $args->args['<firstFile>'];
         $file2 = $args->args['<secondFile>'];
 
-        echo genDiff($file1, $file2, $format) . PHP_EOL;
+        echo genDiff($file1, $file2, $format);
     } catch (\Exception | \RuntimeException $e) {
-        echo $e->getMessage() . PHP_EOL;
-        exit(1);
+        echo $e->getMessage() ;
     }
 }
