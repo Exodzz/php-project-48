@@ -25,7 +25,7 @@ function getIndent(int $depth, int $offset): string
     return str_repeat(INDENT_SYMBOL, $count);
 }
 
-function formatResult(array $diff, int $depth = 1): string
+function formatResult(array $diff, int $depth = 1): string|bool
 {
     $lines = array_map(function ($item) use ($depth) {
         $indent = getIndent($depth, INDENT_COUNT / 2);

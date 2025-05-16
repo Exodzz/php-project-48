@@ -28,7 +28,7 @@ function makeLine(string $property, int $mark, string $value = null, string $new
     }
 }
 
-function formatResult(array $diff, array $acc = [], string $path = ''): string
+function formatResult(array $diff, array $acc = [], string $path = ''): string|bool
 {
     $result = array_reduce($diff, function (array $acc, array $item) use ($path) {
         $pathCurrent = $path === '' ? $item['key'] : "{$path}.{$item['key']}";
