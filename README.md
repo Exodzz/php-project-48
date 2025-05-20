@@ -4,3 +4,9 @@
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=Exodzz_php-project-48&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=Exodzz_php-project-48)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=Exodzz_php-project-48&metric=coverage)](https://sonarcloud.io/summary/new_code?id=Exodzz_php-project-48)
 [![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=Exodzz_php-project-48&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=Exodzz_php-project-48)
+
+Usage
+
+Parity
+
+<a href="https://asciinema.org/a/oxUSvjoxM8La3FimG0eBwnBjL" target="_blank"><img src="https://asciinema.org/a/oxUSvjoxM8La3FimG0eBwnBjL.svg"/></a>
