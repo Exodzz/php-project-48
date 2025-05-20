@@ -5,7 +5,7 @@ namespace Differ\Differ;
 const DEFAULT_FORMAT = 'stylish';
 
 use Exception;
-use function Differ\CompareArrays\compareTrees;
+use function Differ\ArrayComparer\compareTrees;
 use function Differ\Formatter\formatResult;
 use function Differ\Parsers\getData;
 

@@ -21,7 +21,7 @@
     "autoload": {
         "files": [
             "src/Differ.php",
-            "src/CompareArrays.php",
+            "src/ArrayComparer.php",
             "src/Parsers.php",
             "src/Formatter.php",
             "src/Formatters/Stylish.php",

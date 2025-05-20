@@ -1,6 +1,6 @@
 <?php
 
-namespace Differ\CompareArrays;
+namespace Differ\ArrayComparer;
 
 function putDiffMark(mixed $key, mixed $value, int $mark, bool $isUpdatedValue = null, mixed $newValue = null): array
 {
